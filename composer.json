@@ -1,0 +1,11 @@
+{
+    "name": "ssx/open-data-parser",
+    "description": "A parser for open data systems in the UK",
+    "authors": [
+        {
+            "name": "Scott Wilcox",
+            "email": "scott@dor.ky"
+        }
+    ],
+    "require": {}
+}
