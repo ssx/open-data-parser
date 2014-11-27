@@ -7,5 +7,12 @@
             "email": "scott@dor.ky"
         }
     ],
-    "require": {}
+    "autoload": {
+        "psr-4": {
+            "SSX\\OpenData\\": "src"
+        }
+    },
+    "require": {
+        "guzzlehttp/guzzle": "~5.0"
+    }
 }
