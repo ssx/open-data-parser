@@ -2,29 +2,54 @@
 namespace SSX\OpenData\Area;
 
 class TyneAndWear implements \SSX\OpenData\DataParserContract {
-    var $aryData = array();
+    var $aryData    = array();
+    var $apiURL     = "https://www.netraveldata.co.uk/api/v1/carpark/dynamic";
+    var $woeid      = "12695859";
+    var $username   = "";
+    var $password   = "";
 
-    public function __construct()
+    public function __construct($aryCredentials = array())
     {
-        $this->aryData[] = array(
-            "identifier" => "24875484_C07326",
-            "location_id" => "C07326",
-            "woeid" => "24875484",
-            "city" => "Newcastle upon Tyne",
-            "name" => "West Quay Multi-Storey",
-            "image_url" => "http:\/\/southampton.romanse.org.uk\/staticfiles\/car%20parks\/C07326.jpg",
-            "created_at" => "2014-11-27 21:51:26",
-            "updated_at" => "2014-11-27 21:51:26",
-            "timestamp" => 1417125000,
-            "collection_date" => "2014-11-27",
-            "collection_time" => "21:50:00",
-            "state" => "spaces",
-            "capacity" => 2489,
-            "used" => 5,
-            "free_00" => 2484,
-            "free_30" => 2468,
-            "free_60" => 2452
-        );
+        if (isset($aryCredentials["username"])) {
+            $this->username = $aryCredentials["username"];
+        } else {
+            throw new \Exception("No username provided");
+        }
+
+        if (isset($aryCredentials["password"])) {
+            $this->password = $aryCredentials["password"];
+        } else {
+            throw new \Exception("No password provided");
+        }
+
+        // Make our request
+        $client = new \GuzzleHttp\Client();
+        $res = $client->get($this->apiURL, array('auth' => array($this->username, $this->password)));
+        if ($res->getStatusCode() == 200)
+        {
+            foreach ($res->json() as $intIndex => $aryCarParkData)
+            {
+                $this->aryData[] = array(
+                    "identifier"        => $this->woeid."_".$aryCarParkData["systemCodeNumber"],
+                    "location_id"       => $aryCarParkData["systemCodeNumber"],
+                    "woeid"             => $this->woeid,
+                    "city"              => "Newcastle upon Tyne",
+                    "name"              => "Car Park: ".$aryCarParkData["systemCodeNumber"],
+                    "image_url"         => "",
+                    "created_at"        => "",
+                    "updated_at"        => "",
+                    "timestamp"         => time(),
+                    "collection_date"   => "",
+                    "collection_time"   => "",
+                    "state"             => strtolower($aryCarParkData["dynamics"][0]["stateDescription"]),
+                    "capacity"          => 0,
+                    "used"              => $aryCarParkData["dynamics"][0]["occupancy"]
+                );
+             }
+        } else
+        {
+            throw new \Exception("HTTP Code: ".$res->getStatusCode()." returned for request to ".$this->apiURL);
+        }
     }
 
     public function getData()
